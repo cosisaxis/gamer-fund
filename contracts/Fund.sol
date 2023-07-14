@@ -5,6 +5,8 @@ contract Crowdfunding {
     address public projectOwner;
     uint public fundingGoal;
     uint public totalFundsRaised;
+    uint public campaignStartTime;
+    uint public campaignDuration;
 
     mapping(address => uint) public contributions;
     mapping(address => bool) public backers;
@@ -14,9 +16,10 @@ contract Crowdfunding {
     event FundingReceived(address indexed backer, uint amount);
     event RefundClaimed(address indexed backer, uint amount);
 
-    constructor(uint _fundingGoal) {
+    constructor(uint _fundingGoal, uint _campaignDuration) {
         projectOwner = msg.sender;
         fundingGoal = _fundingGoal * 1 ether;
+        campaignDuration = _campaignDuration;
     }
 
     modifier onlyOwner() {
@@ -78,7 +81,9 @@ contract Crowdfunding {
 
     function getRemainingTime() public view returns (uint) {
         if (!campaignEnded) {
-            return 0;
+             uint elapsedTime = block.timestamp - campaignStartTime;
+            uint remainingTime = campaignDuration > elapsedTime ? campaignDuration - elapsedTime : 0;
+            return remainingTime;
         }
         return 0;
     }
